@@ -1,0 +1,248 @@
+---
+title: "Mini project by Cedric"
+author: "Cedric Xavier M"
+date: "`r Sys.Date()`"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = TRUE)
+```
+
+```{r}
+getwd()
+```
+
+# MINI PROJECT PRESENTATION
+
+The Mini project on the Maternal Health RisK Dataset
+### Load the Maternal health data set 
+# load the various packages that will be used
+
+```{r}
+
+library(dplyr)
+library(tidyverse)
+library(dslabs)
+```
+
+
+```{r}
+library(reticulate)
+
+```
+```{python}
+import sys
+print(sys.version)
+```
+```{r}
+library(reticulate)
+np <- import("numpy")
+plt <- import("matplotlib.pyplot")
+pd<-import("pandas")
+Maternal_health<- read.csv( file= 'Maternal Health Risk Data Set.csv' )
+```
+
+## print the data set
+```{r}
+Maternal_health
+```
+
+
+## Grouping by Risk level and finding the mean age of each risk group in descending order 
+
+```{r}
+Maternal_health %>% 
+  group_by(RiskLevel) %>%
+  summarize(mean_age= mean(Age))%>% 
+  arrange(desc(mean_age))
+```
+- We observe an increase of the risk level with age
+
+## Median Diastolic BP by risk group
+
+
+```{r}
+Maternal_health %>% 
+  group_by(RiskLevel) %>%
+  summarize(median_Diastolic= median(DiastolicBP))%>% 
+  arrange(median_Diastolic)
+```
+- High group has a higher diastolic BP 
+- both analysis suggest that older individuals are at a higher risk compared to younger individuals also higher Diastolic BP is correlated to high risk
+-This may suggest that diastolic pressure is higher in older individuals and drives level of risk
+
+## Creating  a new variable **systolic rate**. 
+-systolic rate = systolicBP/age
+
+```{r}
+Maternal_health1 <- mutate(Maternal_health, systolic_rate = SystolicBP )
+head(Maternal_health1)
+```
+##  Filter participants of age <= 40 years and determine average systolic rate for each risk level
+
+```{r , echo = TRUE}
+Filtered_by_age <- filter(Maternal_health1, Age <= 40)
+print(Filtered_by_age)
+```
+
+## Determine average systolic rate for each risk level
+```{r}
+Filtered_by_age %>% 
+  group_by(RiskLevel) %>%
+  summarize(average_systolic_rate= mean(systolic_rate)) 
+```
+- Individuals at higher risk level have a higher systolic rate
+- Just like Diastolic BP systolic rate increases with risk level
+
+## calculate the five-number summary for each variable
+```{r}
+py$Maternal_health <- Maternal_health1
+```
+
+
+```{python}
+import numpy as np
+import pandas as pd
+print(r.Maternal_health1)
+df= r.Maternal_health1
+```
+## Create histogram and box plot for all continious variable and calculate the five-number summary for each variable, grouped by risk level
+
+## Histograms for all continious variable
+
+### Histogram 
+
+```{python}
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+df= r.Maternal_health
+continous_variables = ['Age', 'SystolicBP', 'DiastolicBP', 'BS', 'BodyTemp', 'HeartRate']
+for var in continous_variables:
+  plt.figure()
+  sns.histplot(df[var], kde=True) 
+  plt.title(f'Histogram of {var}')
+  plt.xlabel(var)
+  plt.ylabel('Frequency')
+  plt.show()
+
+
+
+```
+## Inside into the distribution of the data
+
+- Is skewed to the left
+- The 15 to 35 age group is the most represented
+- Diastolic BP, systolic BP and Heart rate are normally distributed
+
+
+## Box plots
+```{python}
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+df= r.Maternal_health
+continous_variables = ['Age', 'SystolicBP', 'DiastolicBP', 'BS', 'BodyTemp', 'HeartRate']
+for var in continous_variables:
+  plt.figure()
+  sns.boxplot(data=df[continous_variables])  
+  plt.title('Box Plots of Continous Variables')
+  plt.show()
+  
+
+```
+plt.boxplot(data=df[var] , notch =False , vert = True , widths = 0.2 , labels = df[var]
+            ,showmeans = True , boxprops = dict(color= "red") ,capprops = dict(color = "red") , sym= "g+",  whiskerprops = dict(color = "red") )
+
+  plt.show()
+
+## calculate the five-number summary for each variable, grouped by risk level]
+
+```{python}
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+df= r.Maternal_health
+byRiskLevel = df.groupby('RiskLevel')
+```
+
+###  age by riskLevel 
+```{python}
+import numpy as np
+import pandas as pd
+byRiskLevel = df.groupby('RiskLevel')
+byRiskLevel.describe()['Age']
+```
+
+### -Systolic BP by RiskLevel
+```{python}
+import numpy as np
+import pandas as pd
+byRiskLevel = df.groupby('RiskLevel')
+byRiskLevel.describe()['SystolicBP']
+
+
+```
+###Diastolic BP by RiskLevel
+
+```{python}
+import numpy as np
+import pandas as pd
+byRiskLevel = df.groupby('RiskLevel')
+byRiskLevel.describe()['DiastolicBP']
+```
+### BS RiskLevel
+
+```{python}
+import numpy as np
+import pandas as pd
+byRiskLevel = df.groupby('RiskLevel')
+byRiskLevel.describe()['BS']
+
+```
+### Body Temperature by Risk level
+```{python}
+import numpy as np
+import pandas as pd
+byRiskLevel = df.groupby('RiskLevel')
+byRiskLevel.describe()['BodyTemp']
+
+```
+### Heart rate  by risk level
+```{python}
+import numpy as np
+import pandas as pd
+byRiskLevel = df.groupby('RiskLevel')
+byRiskLevel.describe()['HeartRate']
+
+```
+
+## Realtionship between variables
+
+### Age as an independent variable
+
+```{r}
+library(dslabs)
+Maternal_health
+plot(Maternal_health$Age, Maternal_health$HeartRate )
+plot(Maternal_health$SystolicBP, Maternal_health$HeartRate )
+plot(Maternal_health$DiastolicBP, Maternal_health$HeartRate )
+plot(Maternal_health$BodyTemp, Maternal_health$HeartRate )
+```
+- There seem to be no correlation between age does not influence Systolic nor Diastolic BPs, nor body temperature
+
+
+
+```
+- There is no relationship between body temperature,systolic and diastolic BP
+
+
+```{r}
+
+```
+
+
